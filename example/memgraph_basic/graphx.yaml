@@ -1,0 +1,5 @@
+name: memgraph_basic
+address: localhost:7687
+username: ""
+password: ""
+poolSize: 5

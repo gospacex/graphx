@@ -1,0 +1,5 @@
+services:
+  tigergraph:
+    image: tigergraph/tigergraph:latest
+    ports:
+      - "14240:14240"

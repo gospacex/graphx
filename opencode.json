@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "command": {
+    "sddflow": {
+      "template": "Use the sddflow skill to handle this request. Phase: {{input}}",
+      "description": "OpenSpec + Superpowers workflow orchestrator. Subcommands: brainstorming, spec, amend, build, close",
+      "subtask": true
+    }
+  }
+}

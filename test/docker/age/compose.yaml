@@ -1,0 +1,9 @@
+services:
+  postgres:
+    image: apache/age:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: age
+      POSTGRES_PASSWORD: age
+      POSTGRES_DB: agedb

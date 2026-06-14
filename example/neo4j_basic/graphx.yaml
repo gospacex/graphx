@@ -1,0 +1,5 @@
+name: neo4j_basic
+address: localhost:7687
+username: neo4j
+password: password
+poolSize: 5

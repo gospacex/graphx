@@ -1,0 +1,56 @@
+# NebulaGraph 3.8.0 compose — requires init.sh (not standalone docker compose up).
+#
+# ⚠️ Nebula ADD HOSTS requires IP addresses, not hostnames.
+#    Docker compose passes --local_ip=<hostname> which storaged reports as its address,
+#    causing "Heartbeat failed, status:Machine not existed!" from metad.
+#
+# Fix: run init.sh which recreates storaged with its real container IP:
+#   bash test/docker/nebula/init.sh
+#
+services:
+  nebula-metad:
+    image: vesoft/nebula-metad:v3.8.0
+    ports:
+      - "9559:9559"
+    environment:
+      USER: root
+    command:
+      - --meta_server_addrs=nebula-metad:9559
+      - --local_ip=nebula-metad
+      - --port=9559
+      - --daemonize=false
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:19559/status"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  nebula-storaged:
+    image: vesoft/nebula-storaged:v3.8.0
+    ports:
+      - "9779:9779"
+    environment:
+      USER: root
+    command:
+      - --meta_server_addrs=nebula-metad:9559
+      - --local_ip=nebula-storaged
+      - --port=9779
+      - --daemonize=false
+    depends_on:
+      nebula-metad:
+        condition: service_healthy
+
+  nebulagraph:
+    image: vesoft/nebula-graphd:v3.8.0
+    ports:
+      - "9669:9669"
+    environment:
+      USER: root
+    command:
+      - --meta_server_addrs=nebula-metad:9559
+      - --local_ip=nebulagraph
+      - --port=9669
+      - --daemonize=false
+    depends_on:
+      nebula-metad:
+        condition: service_healthy
