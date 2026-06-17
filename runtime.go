@@ -48,9 +48,11 @@ func (s *Singleton[T]) Get(factory func() (*T, error)) (*T, error) {
 	return inst, nil
 }
 
-// Reset clears the cached instance. Intended for testing only.
-func (s *Singleton[T]) Reset() {
+// Reset clears the cached instance and returns the previous value.
+// Intended for testing and graceful cleanup only.
+func (s *Singleton[T]) Reset() *T {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.instance.Store(nil)
+	prev := s.instance.Swap(nil)
+	return prev
 }

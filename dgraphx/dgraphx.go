@@ -174,6 +174,9 @@ func getNamed(ctx context.Context, cfg graphx.Config) (*Dgraph, error) {
 func Reset() {
 	defaultInst.Reset()
 	namedMu.Lock()
+	for _, inst := range namedInst {
+		_ = inst.Close(context.Background())
+	}
 	namedInst = map[string]*Dgraph{}
 	namedMu.Unlock()
 }

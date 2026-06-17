@@ -87,6 +87,9 @@ func Kafka(cfg MQConfig) (*kafka.Producer, error) {
 	if cfg.Kafka.SecurityProtocol != "" {
 		conf.SetKey("security.protocol", cfg.Kafka.SecurityProtocol)
 	}
+	if cfg.Kafka.SASLMechanism != "" {
+		conf.SetKey("sasl.mechanism", cfg.Kafka.SASLMechanism)
+	}
 	// Default: no auth needed for local dev
 	if cfg.Auth.Username != "" {
 		conf.SetKey("sasl.username", cfg.Auth.Username)

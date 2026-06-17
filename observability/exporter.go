@@ -25,7 +25,14 @@ func newSpanExporter(ctx context.Context, cfg *Config) (sdktrace.SpanExporter, e
 			Driver: "kafka",
 			Mode:   "cluster",
 			Addrs:  cfg.KafkaBrokers,
-			Kafka:  mqxbinding.KafkaConfig{SecurityProtocol: cfg.KafkaSASL.Mechanism},
+			Kafka: mqxbinding.KafkaConfig{
+				SecurityProtocol: cfg.KafkaSASL.Protocol,
+				SASLMechanism:    cfg.KafkaSASL.Mechanism,
+			},
+			Auth: mqxbinding.AuthConfig{
+				Username: cfg.KafkaSASL.Username,
+				Password: cfg.KafkaSASL.Password,
+			},
 		}
 		prod, err := mqxbinding.Kafka(mqCfg)
 		if err != nil {

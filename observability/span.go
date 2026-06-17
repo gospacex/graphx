@@ -2,7 +2,13 @@ package observability
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Tracer wraps OTel's tracer with a simplified Start method.
@@ -19,26 +25,42 @@ type Span interface {
 type otelTracer struct{}
 
 func (t *otelTracer) Start(ctx context.Context, spanName string, attrs ...any) (context.Context, Span) {
-	tr := globalTracerProvider()
-	if tr == nil {
+	tp := otel.GetTracerProvider()
+	tp, ok := tp.(trace.TracerProvider)
+	if !ok {
 		return ctx, noopSpan{}
 	}
-	cctx, s := tr.Start(ctx, spanName)
-	return cctx, &otelSpan{s: s}
+	tracer := tp.Tracer("graphx")
+	cctx, s := tracer.Start(ctx, spanName)
+	os := &otelSpan{s: s}
+	for i := 0; i < len(attrs)-1; i += 2 {
+		if key, ok := attrs[i].(string); ok {
+			os.SetAttribute(key, attrs[i+1])
+		}
+	}
+	return cctx, os
 }
 
 type otelSpan struct {
-	s interface{ End(...any) }
+	s trace.Span
 }
 
 func (s *otelSpan) End(err error) {
-	_ = err
-	if s.s != nil {
-		s.s.End()
+	if s.s == nil {
+		return
 	}
+	if err != nil {
+		s.s.RecordError(err)
+		s.s.SetStatus(codes.Error, err.Error())
+	}
+	s.s.End()
 }
 
 func (s *otelSpan) SetAttribute(key string, value any) {
+	if s.s == nil {
+		return
+	}
+	s.s.SetAttributes(attribute.String(key, fmt.Sprintf("%v", value)))
 }
 
 // NewTracer returns a Tracer that delegates to the global OTel TracerProvider.
@@ -48,14 +70,6 @@ func NewTracer() Tracer {
 }
 
 var noopTracer = &FallbackTracer{}
-
-// globalTracerProvider returns the global TracerProvider if available.
-// Returns nil if OTel is not initialized.
-func globalTracerProvider() interface {
-	Start(ctx context.Context, spanName string, opts ...any) (context.Context, interface{ End(...any) })
-} {
-	return nil
-}
 
 type noopSpan struct{}
 

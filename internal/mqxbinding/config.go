@@ -22,4 +22,5 @@ type RedisConfig struct {
 
 type KafkaConfig struct {
 	SecurityProtocol string `yaml:"security_protocol,omitempty"`
+	SASLMechanism    string `yaml:"sasl_mechanism,omitempty"`
 }

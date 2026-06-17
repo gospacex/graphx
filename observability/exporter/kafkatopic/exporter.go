@@ -64,5 +64,7 @@ func (e *spanExporter) ExportSpans(ctx context.Context, spans []trace.ReadOnlySp
 }
 
 func (e *spanExporter) Shutdown(ctx context.Context) error {
+	e.producer.Flush(15 * 1000)
+	e.producer.Close()
 	return nil
 }

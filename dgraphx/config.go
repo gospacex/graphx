@@ -2,7 +2,7 @@ package dgraphx
 
 import (
 	"fmt"
-	"strings"
+	"net"
 
 	"github.com/gospacex/graphx"
 )
@@ -19,10 +19,19 @@ func Build(cfg graphx.Config) (DgraphConfig, error) {
 	if cfg.Address == "" {
 		return DgraphConfig{}, fmt.Errorf("graphx/dgraphx: address must not be empty")
 	}
-	addr := strings.Replace(cfg.Address, "localhost", "127.0.0.1", 1)
 
-	if strings.HasSuffix(addr, ":9080") {
-		addr = strings.Replace(addr, ":9080", ":8080", 1)
+	host, port, err := net.SplitHostPort(cfg.Address)
+	if err != nil {
+		host = cfg.Address
+		port = "8080"
+	}
+
+	if port == "9080" {
+		port = "8080"
+	}
+
+	if host == "localhost" {
+		host = "127.0.0.1"
 	}
 
 	scheme := "http"
@@ -30,6 +39,7 @@ func Build(cfg graphx.Config) (DgraphConfig, error) {
 		scheme = "https"
 	}
 
+	addr := net.JoinHostPort(host, port)
 	return DgraphConfig{
 		BaseURL: fmt.Sprintf("%s://%s", scheme, addr),
 		Scheme:  scheme,

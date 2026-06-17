@@ -172,6 +172,9 @@ func getNamed(ctx context.Context, cfg graphx.Config) (*Memgraph, error) {
 func Reset() {
 	defaultInst.Reset()
 	namedMu.Lock()
+	for _, inst := range namedInst {
+		_ = inst.Close(context.Background())
+	}
 	namedInst = map[string]*Memgraph{}
 	namedMu.Unlock()
 }

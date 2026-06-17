@@ -162,6 +162,9 @@ func getNamed(ctx context.Context, cfg graphx.Config) (*Neo4j, error) {
 func Reset() {
 	defaultInst.Reset()
 	namedMu.Lock()
+	for _, inst := range namedInst {
+		_ = inst.Close(context.Background())
+	}
 	namedInst = map[string]*Neo4j{}
 	namedMu.Unlock()
 }

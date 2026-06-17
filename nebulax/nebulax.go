@@ -185,6 +185,9 @@ func getNamed(ctx context.Context, cfg graphx.Config) (*Nebula, error) {
 func Reset() {
 	defaultInst.Reset()
 	namedMu.Lock()
+	for _, inst := range namedInst {
+		_ = inst.Close(context.Background())
+	}
 	namedInst = map[string]*Nebula{}
 	namedMu.Unlock()
 }

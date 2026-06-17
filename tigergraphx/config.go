@@ -2,7 +2,7 @@ package tigergraphx
 
 import (
 	"fmt"
-	"strings"
+	"net"
 
 	"github.com/gospacex/graphx"
 )
@@ -17,12 +17,23 @@ func Build(cfg graphx.Config) (TigerGraphConfig, error) {
 	if cfg.Address == "" {
 		return TigerGraphConfig{}, fmt.Errorf("graphx/tigergraphx: address must not be empty")
 	}
+
+	host, port, err := net.SplitHostPort(cfg.Address)
+	if err != nil {
+		host = cfg.Address
+		port = "14240"
+	}
+
+	if host == "localhost" {
+		host = "127.0.0.1"
+	}
+
 	scheme := "http"
 	if cfg.TLS {
 		scheme = "https"
 	}
-	addr := strings.Replace(cfg.Address, "localhost", "127.0.0.1", 1)
+
 	return TigerGraphConfig{
-		BaseURL: fmt.Sprintf("%s://%s", scheme, addr),
+		BaseURL: fmt.Sprintf("%s://%s", scheme, net.JoinHostPort(host, port)),
 	}, nil
 }

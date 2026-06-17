@@ -29,6 +29,7 @@ type SASLConfig struct {
 	Username  string `yaml:"username"`
 	Password  string `yaml:"password"`
 	Mechanism string `yaml:"mechanism"`
+	Protocol  string `yaml:"protocol"`
 }
 
 // ExporterType identifies the OTLP trace exporter backend.
